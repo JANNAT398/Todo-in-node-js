@@ -1,68 +1,84 @@
-const express = require('express')
+require('dotenv').config();
 
-const Task = require('./Models/schemaModel')
+const express = require('express');
+const multer = require('multer');
 
-const app = express()
+const app = express();
 
-const mongoose = require('mongoose')
+const securityMaintain = require('./Middleware/security');
+const mongodbConnect = require('./config/mongodbConfig');
 
-app.use(express.json())
+const { registrationController } = require('./controller/authenticationController');
 
-mongoose.connect('mongodb+srv://jannataktert789_db_user:OuP3ypx5aoQ8A6c5@cluster0.d3vuwdf.mongodb.net/todo')
-    .then(() => console.log('Database Connected!'))
-    
+const User = require('./Models/schemaModel');
 
+app.use(express.json());
 
-app.post('/create/todo', async (req, res) => {
-
-    let { task, priority } = req.body
-
-    console.log(task, priority)
-     if(!task){
-          return res.status(400).send('give me a task')
-     }
-    let todo = new Task({
-        task: task,
-        priority: priority
-    })
-
-    await todo.save()
-
-    res.send(todo)
-
-})
+// MongoDB Connection
+mongodbConnect();
 
 
-function securityMaintain(req,res,next){
-     if(req.headers.authorization == 'sgdfagdsfahj'){
-          next()
-     }else{
-          res.status(401).send("You are not authorized")
-     }
-}
+// Multer Storage Configuration
+const storage = multer.diskStorage({
+
+    destination: function (req, file, cb) {
+        cb(null, './uploads');
+    },
+
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    }
+
+});
 
 
-app.get('/all/todo',securityMaintain,async (req,res)=>{
-     let data = await Task.find({})
-     res.send(data)
-})
+// Multer Upload Middleware
+const upload = multer({ storage: storage });
 
 
-app.delete('/delete/:id',async (req,res)=>{
-     const {id} = req.params
-     await Task.findByIdAndDelete(id)
-     res.send("delete")
-})
+// Create Todo
+app.post('/create/todo', upload.single('profile'), registrationController);
 
 
+// Get All Todo
+app.get('/all/todo', securityMaintain, async (req, res) => {
 
-app.post('/update/:id',async (req,res)=>{
-     let {id} = req.params
-    let update =  await Task.findByIdAndUpdate({_id:id},req.body,{new:true})
-    res.send(update)
-})
+    let data = await User.find({});
+
+    res.send(data);
+
+});
 
 
+// Delete Todo
+app.delete('/delete/:id', async (req, res) => {
+
+    const { id } = req.params;
+
+    await User.findByIdAndDelete(id);
+
+    res.send("delete");
+
+});
+
+
+// Update Todo
+app.post('/update/:id', async (req, res) => {
+
+    let { id } = req.params;
+
+    let update = await User.findByIdAndUpdate(
+        id,
+        req.body,
+        { new: true }
+    );
+
+    res.send(update);
+
+});
+
+
+// Server
 app.listen(5000, () => {
-    console.log('Server running on port 5000')
-})
+    console.log('Server running on port 5000');
+});
