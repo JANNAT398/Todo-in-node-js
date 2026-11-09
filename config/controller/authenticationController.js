@@ -1,6 +1,51 @@
-// const nodemailer = require("nodemailer");
-// const User = require('../../Models/schemaModel.js')
-// const multer = require('multer');
+const nodemailer = require("nodemailer");
+const User = require('../../Models/schemaModel.js')
+const multer = require('multer');
+
+
+// Create a transporter using SMTP
+const transporter = nodemailer.createTransport({
+    sevice: "gmail",
+  port: 587,
+  secure: false,
+  auth: {
+    user: 'islamjanat956@gmail.com',
+    pass: 'snhpafyumnsafta',
+  },
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //  // Create a transporter using SMTP
@@ -14,24 +59,80 @@
 //   },
 // });
 
-//  let registrationController =(async (req, res) => {
-//     console.log(req.file)
-//     let { name, email } = req.body
-//     let existingMail = await User.findOne({ email: email });
+ let registrationController =(async (req, res) => {
+    console.log(req.file)
+    let { name, email } = req.body
+    let existingMail = await User.findOne({ email: email });
 
-//     if (existingMail) {
-//         return res.status(409).send("Email already exists");
-//     }
-//     console.log(name, email)
-//      if(!name){
-//           return res.status(400).send('give me a name')
-//      }
-//     let user  = new User({
-//         name: name,
-//         email: email
-//     })
+    if (existingMail) {
+        return res.status(409).send("Email already exists");
+    }
+    console.log(name, email)
+     if(!name){
+          return res.status(400).send('give me a name')
+     }
+    let user  = new User({
+        name: name,
+        email: email
+    })
 
-//     await user.save()
+    await user.save()
+
+    try {
+        const info = await transporter.sendMail({
+          from: '"Example Team" <islamjanat956@gmail.com>', // sender address
+          to: email, // list of recipients
+          subject: "Hello", // subject line
+          text: "Hello world?", // plain text body
+          html:`<body style="margin:0; padding:0; background-color:#f4f7f6; font-family:Arial,sans-serif;"><div style="max-width:600px; margin:40px auto; background:#ffffff; border-radius:12px; overflow:hidden;"><div style="background:#00B207; padding:30px; text-align:center; color:white;"><h1 style="margin:0;">Welcome Back!</h1><p style="margin-top:10px;">Authentication Successful</div><div style="padding:35px 30px; text-align:center;"><div style="font-size:55px; color:#00B207;">✓</div><h2 style="color:#333;">Hello {{name}}!</h2><p style="color:#666; font-size:15px; line-height:1.7;">Great news! Your authentication was completed successfully. You can now access your account and enjoy all our features.</p><a href="https://yourwebsite.com/" style="display:inline-block; margin-top:20px; padding:14px 30px; background:#00B207; color:white; text-decoration:none; border-radius:6px; font-weight:bold;">Go to Dashboard</a><p style="margin-top:30px; color:#888; font-size:13px;">If you did not perform this action, please contact our support team.</div><div style="background:#f4f7f6; padding:20px; text-align:center;"><p style="margin:0; color:#888; font-size:12px;">© 2026 Your Company. All rights reserved.</div></div>`, // HTML body
+        });
+      
+        console.log("Message sent: %s", info.messageId);
+        // Preview URL is only available when using an Ethereal test account
+        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+      } catch (err) {
+        console.error("Error while sending mail:", err);
+      }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //     let verificationLink = "http://localhost:5000/verify"
 
@@ -54,6 +155,6 @@
 //      message:'Done'
 //     })
 
-// })
+})
 
-// module.exports = {registrationController}
+module.exports = {registrationController}
